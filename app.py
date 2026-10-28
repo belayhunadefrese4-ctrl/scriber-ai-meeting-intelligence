@@ -80,7 +80,7 @@ payment_method = st.sidebar.selectbox(
 if "Telebirr" in payment_method:
     st.sidebar.caption("💡 Telebirr Pay: Send to Merchant/Number **+251 986884912** and enter Transaction ID below.")
 elif "CBE" in payment_method:
-    st.sidebar.caption("💡 CBE Account: Transfer to **1000XXXXXXXXX** and enter Reference No. below.")
+    st.sidebar.caption("💡 CBE Account: Transfer to **1000296269488** and enter Reference No. below.")
 elif "WorldRemit" in payment_method or "Wave" in payment_method:
     st.sidebar.caption("💡 International Transfer: Send directly to Telebirr/CBE account **+251 986884912** (Name: Belayhun Adefrese).")
 
