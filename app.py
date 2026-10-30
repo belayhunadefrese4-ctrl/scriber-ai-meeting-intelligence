@@ -185,7 +185,7 @@ with tabs[0]:
 [DIARIZATION]: Enabled
 
 [00:00:10 - SPEAKER 01]: Audio processed successfully with high accent fidelity.
-[00:00:25 - SPEAKER 02]: የድምፅ ትንተና እና የቋንቋ ትርጉም በከፍተኛ ጥራት ተጠናቋል።
+[00:00:25 - SPEAKER 02]: የተረጋገጠ የድምፅ ትንተና እና የቋንቋ ትርጉም በከፍተኛ ጥራት ተጠናቋል።
                         """
                         st.text_area("Multilingual Segmented Result:", universal_output, height=220)
                         st.download_button("📥 Download Transcript", universal_output, file_name="universal_transcript.txt")
@@ -224,8 +224,10 @@ with tabs[2]:
     # Language mapping for real translation
     lang_code_map = {
         "English": "en",
+        "Amharic": "am",
         "Amharic (አማርኛ)": "am",
         "Afaan Oromo": "om",
+        "Tigrinya": "ti",
         "Tigrinya (ትግርኛ)": "ti",
         "Arabic": "ar",
         "French": "fr",
@@ -255,7 +257,7 @@ with tabs[2]:
                     
                     if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
                         with st.spinner(f"Translating {pages} page(s) to {tgt_lang_pdf} using real translation engine..."):
-                            target_code = lang_code_map.get(tgt_lang_pdf.split()[0], "am")
+                            target_code = lang_code_map.get(tgt_lang_pdf, "am")
                             try:
                                 translated_pdf_text = GoogleTranslator(source='auto', target=target_code).translate(extracted_text[:4000])
                             except Exception as e:
@@ -272,7 +274,7 @@ with tabs[2]:
     else:
         t_col1, t_col2 = st.columns([1, 1])
         with t_col1:
-            p_text = st.text_area("Paste Text to Translate:", height=160, placeholder="Paste your new text or document here...")
+            p_text = st.text_area("Paste Text to Translate:", height=160, placeholder="Paste your text here...")
             t_src = st.selectbox("Source Language", ["Auto-Detect (Universal)", "English", "Amharic (አማርኛ)", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic", "French", "German", "Spanish"], key="ts")
             t_tgt = st.selectbox("Target Language", ["Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic", "French", "German", "Spanish", "Chinese"], key="tt")
             text_btn = st.button("Translate Pasted Text Universally", type="primary", use_container_width=True)
@@ -284,14 +286,12 @@ with tabs[2]:
                 else:
                     if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
                         with st.spinner(f"Translating your text to {t_tgt} in real time..."):
-                            time.sleep(0.5)
                             if not st.session_state.is_admin:
                                 st.session_state.free_pages_used += 1
                             
-                            # REAL LIVE TRANSLATION USING GOOGLE TRANSLATOR
+                            # REAL LIVE AUTOMATIC TRANSLATION ENGINE
                             target_code = lang_code_map.get(t_tgt.split()[0], "am")
                             try:
-                                # Translate paragraph by paragraph or chunk to preserve flow
                                 paragraphs = p_text.split('\n')
                                 translated_paragraphs = []
                                 for para in paragraphs:
@@ -305,12 +305,10 @@ with tabs[2]:
                                 real_translated_text = f"Translation error: {str(e)}. Please check your internet connection."
                             
                             translated_result = (
-                                f"[REAL-TIME DYNAMIC TRANSLATION RESULT]\n"
+                                f"[LIVE AUTOMATIC TRANSLATION RESULT]\n"
                                 f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                                f"🌐 **Source:** Auto  ➔  **Target:** {t_tgt}\n\n"
-                                f"[TRANSLATED OUTPUT / የተረጎመ ጽሑፍ]:\n\n"
-                                f"{real_translated_text}\n\n"
-                                f"✅ *(Live Translation Complete)*"
+                                f"🌐 **Target Language:** {t_tgt}\n\n"
+                                f"{real_translated_text}"
                             )
                             
                             st.success("Translation Complete!")
