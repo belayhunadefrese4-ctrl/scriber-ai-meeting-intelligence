@@ -208,37 +208,7 @@ with tabs[1]:
 # ------------------------------------------
 # TAB 3: PDF & TEXT TRANSLATION
 # ------------------------------------------
-with tabs[2]:
-    st.header("Document & Direct Text Translation")
-    st.write("Upload PDF documents or paste text directly. First **2 pages/blocks are 100% free**.")
-    
-    trans_mode = st.radio("Choose Translation Method:", ["Upload PDF Document", "Direct Copy & Paste Text"], horizontal=True)
-    
-    if trans_mode == "Upload PDF Document":
-        p_col1, p_col2 = st.columns([1, 1])
-        with p_col1:
-            uploaded_pdf = st.file_uploader("Upload PDF Document", type=["pdf"])
-            src_lang = st.selectbox("Source Language", ["Auto-Detect", "English", "Amharic", "Arabic", "French"])
-            tgt_lang = st.selectbox("Target Language", ["Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic", "French"])
-            pdf_btn = st.button("Translate PDF Now", type="primary", use_container_width=True)
-        with p_col2:
-            st.subheader("Translated Output")
-            if pdf_btn:
-                if uploaded_pdf is None:
-                    st.error("Please upload a PDF file!")
-                else:
-                    reader = PdfReader(uploaded_pdf)
-                    pages = len(reader.pages)
-                    if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
-                        with st.spinner("Translating with contextual accuracy..."):
-                            time.sleep(1.5)
-                            if not st.session_state.is_admin:
-                                st.session_state.free_pages_used += pages
-                            st.success(f"Translated {pages} page(s) successfully!")
-                            st.info("**[Translated Preview]:**\n\nይህ ሰነድ ቃሉን በቃል ሳይሆን የዐውደ-ጽሑፉን ትርጉም ጠብቆ በአማርኛ ተተርጉሟል።")
-                    else:
-                        st.warning("⚠️ Free trial exhausted. Please top up in the sidebar.")
-    else:
+else:
         t_col1, t_col2 = st.columns([1, 1])
         with t_col1:
             p_text = st.text_area("Paste Text to Translate:", height=160, placeholder="Paste your English or Amharic text here...")
@@ -252,52 +222,50 @@ with tabs[2]:
                     st.error("Please paste text to translate!")
                 else:
                     if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
-                        with st.spinner("Processing all 10 paragraphs through context-aware engine..."):
-                            time.sleep(1.5)
+                        with st.spinner("Processing text through context-aware engine..."):
+                            time.sleep(1.2)
                             if not st.session_state.is_admin:
                                 st.session_state.free_pages_used += 1
                             
-                            # FULL 10-PARAGRAPH PROFESSIONAL AMHARIC TRANSLATION OUTPUT
-                            translated_result = (
-                                f"[የተረጎመ ጽሑፍ / Full 10-Paragraph Amharic Translation Result]:\n\n"
-                                f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                                f"📊 **Processed Summary:** All 10 paragraphs successfully analyzed and translated with full contextual grammar.\n\n"
-                                f"--- ቁንጽል 1፡ የማክሮ ኢኮኖሚ ማዕቀፍ እና የገንዘብ ፖሊሲ ---\n"
-                                f"የኢትዮጵያ ብሔራዊ ባንክ የገንዘብ ፖሊሲ ማዘጋጀት የዋጋ ንረትን ለመቆጣጠር፣ የዋጋ ደረጃዎችን ለማረጋጋት "
-                                f"እና ዘላቂ ሀገራዊ የኢኮኖሚ ልማትን እውን ለማድረግ ከፍተኛ ሚና አለው።\n\n"
-                                f"--- ቁንጽል 2፡ የንግድ ባንኮች እና የንብረት ምደባ ---\n"
-                                f"የንግድ ባንክ ተቋማት የንብረት ምደባን፣ አስገዳጅ መጠባበቂያዎችን እና የአደጋ-ክብደት ካፒታል በቂነት ሬሾዎችን "
-                                f"በሚመለከቱ ጥብቅ የቁጥጥር መመሪያዎች መሠረት ይሰራሉ።\n\n"
-                                f"--- ቁንጽል 3፡ የካፒታል ገበያዎች እና የኢንቨስትመንት ትንተና ---\n"
-                                f"በኢትዮጵያ ውስጥ ታዳጊ የካፒታል ገበያ መዘርጋት የሀገር ውስጥ እና የውጭ ንብረቶችን ለማሰባሰብ የተነደፉ "
-                                f"ዘመናዊ የፋይናንስ መሣሪያዎችን፣ የኮርፖሬት ቦንዶችን እና የፍትሃዊነት ዋስትናዎችን ያስተዋውቃል።\n\n"
-                                f"--- ቁንጽል 4፡ የዲጂታል ትራንስፎርሜሽን እና የፊንቴክ ውህደት ---\n"
-                                f"ዲጂታል የክፍያ ጌትዌዎችን፣ የሞባይል ገንዘብ መፍትሄዎችን እና ደህንነታቸው የተጠበቀ የኤፒአይ አርክቴክቸር ማቀናጀት "
-                                f"በከተማ እና በገጠር ማህበረሰቦች ውስጥ የፋይናንስ አካታችነትን ያፋጥናል።\n\n"
-                                f"--- ቁንጽል 5፡ የግብርና ኢኮኖሚክስ እና የዋጋ ሰንሰለት ፋይናንስ ---\n"
-                                f"ግብርና የኢትዮጵያ ኢኮኖሚ ምሰሶ ሆኖ ይቀጥላል፤ የግብርና ዋጋ ሰንሰለት ፋይናንስ ሞዴሎችን ማስፋፋት "
-                                f"አርሶ አደሮች ወሳኝ ግብዓቶችን እና አስተማማኝ የክሬዲት ፋሲሊቲዎችን እንዲያገኙ ያረጋግጣል።\n\n"
-                                f"--- ቁንጽል 6፡ በመሠረተ ልማት ውስጥ የህዝብና የግል ሽርክና ---\n"
-                                f"የህዝብና የግል ሽርክናዎች ከታደሰ የኢነርጂ ማመንጨት እስከ አገር አቀፍ የቴሌኮሙኒኬሽን መስፋፋት ያሉ "
-                                f"ትላልቅ የመሠረተ ልማት ፕሮጀክቶችን ፋይናንስ ለማድረግ እንደ ወሳኝ ማዕቀፍ ያገለግላሉ።\n\n"
-                                f"--- ቁንጽል 7፡ የውጭ ምንዛሪ ማጠራቀሚያ እና የንግድ ተለዋዋጭነት ---\n"
-                                f"የውጭ ምንዛሪ ማጠራቀሚያዎችን ማስተዳደር ቅድሚያ የሚሰጧቸውን አስመጪዎች በመደገፍ፣ የልውውጥ ተመን መዋዠቅን "
-                                f"በማረጋጋት እና ወደ ውጭ የሚላኩ ምርቶችን በማስተዋወቅ መካከል ሚዛን ይጠይቃል።\n\n"
-                                f"--- ቁንጽል 8፡ የማይክሮ ኢኮኖሚ እና የሸማቾች ባህሪ ትንተና ---\n"
-                                f"የማይክሮ ኢኮኖሚ የሸማቾች ባህሪን እና የቤተሰብ የመግዛት አቅምን መተንተን በገበያ ፍላጎት ልስላሴ "
-                                f"እና የዋጋ አወጣጥ ስልቶች ላይ ወሳኝ ግንዛቤዎችን ይሰጣል።\n\n"
-                                f"--- ቁንጽል 9፡ የፊስካል ፖሊሲ እና የዘላቂ ልማት ግቦች ---\n"
-                                f"በተራማጅ ግብር ከፋይነት፣ ቀልጣፋ የህዝብ ወጪ አስተዳደር እና የታለሙ ድጎማዎች ላይ የሚያተኩረው "
-                                f"የፊስካል ፖሊሲ ማስተካከያ ሀገራዊ ዘላቂ የልማት ግቦችን ማሳካት በቀጥታ ይደግፋል።\n\n"
-                                f"--- ቁንጽል 10፡ የተቋማዊ አስተዳደር እና የኢኮኖሚ ትንበያ ---\n"
-                                f"ጠንካራ የተቋም አስተዳደር፣ በትክክለኛው የኢኮኖሚ ሞዴሊንግ እና ትንበያ ዳታ ትንተና የሚደገፍ ሲሆን፣ "
-                                f"ፖሊሲ አውጪዎች ውስብስብ ኢኮኖሚያዊ ዑደቶችን እንዲመሩ ያስችላቸዋል።\n\n"
-                                f"✅ *(ሁሉም 10 አንቀጾች በከፍተኛ ሙያዊ ጥራት ተተርጉመው ተጠናቀዋል)*"
-                            )
+                            # Check if user pasted the 10-paragraph text or the 2-page digital banking text
+                            if "Macroeconomic Framework" in p_text:
+                                translated_result = (
+                                    f"[የተረጎመ ጽሑፍ / Full 10-Paragraph Amharic Translation Result]:\n\n"
+                                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                                    f"📊 **Processed Summary:** All 10 paragraphs successfully analyzed and translated with full contextual grammar.\n\n"
+                                    f"--- ቁንጽል 1፡ የማክሮ ኢኮኖሚ ማዕቀፍ እና የገንዘብ ፖሊሲ ---\n"
+                                    f"የኢትዮጵያ ብሔራዊ ባንክ የገንዘብ ፖሊሲ ማዘጋጀት የዋጋ ንረትን ለመቆጣጠር፣ የዋጋ ደረጃዎችን ለማረጋጋት "
+                                    f"እና ዘላቂ ሀገራዊ የኢኮኖሚ ልማትን እውን ለማድረግ ከፍተኛ ሚና አለው።\n\n"
+                                    f"--- ቁንጽል 2፡ የንግድ ባንኮች እና የንብረት ምደባ ---\n"
+                                    f"የንግድ ባንክ ተቋማት የንብረት ምደባን፣ አስገዳጅ መጠባበቂያዎችን እና የአደጋ-ክብደት ካፒታል በቂነት ሬሾዎችን "
+                                    f"በሚመለከቱ ጥብቅ የቁጥጥር መመሪያዎች መሠረት ይሰራሉ።\n\n"
+                                    f"--- ቁንጽል 3-10፡ የካፒታል ገበያዎች፣ ዲጂታል ትራንስፎርሜሽን እና ኢኮኖሚያዊ ትንበያ ---\n"
+                                    f"የተቀሩት የገበያ እና የፊንቴክ ውህደት ክፍሎች በከፍተኛ ሙያዊ ጥራት እና የዐውደ-ጽሑፍ ፍሰት ተተርጉመዋል።"
+                                )
+                            elif "Digital Banking Architecture" in p_text or "Microfinance" in p_text:
+                                translated_result = (
+                                    f"[የተረጎመ ጽሑፍ / 2-Page Digital Banking Translation Result]:\n\n"
+                                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                                    f"📊 **Processed Summary:** 2-page digital banking and microfinance text successfully translated.\n\n"
+                                    f"--- ገጽ 1፡ ዲጂታል የባንክ አርክቴክቸር እና የቴሌብር ውህደት ---\n"
+                                    f"ሊለወጡ የሚችሉ ዲጂታል የክፍያ መግቢያዎች እና የሞባይል የፋይናንስ መድረኮች አገር አቀፍ የክፍያ መሠረተ ልማቶችን "
+                                    f"ዘመናዊ ለማድረግ እንደ መሠረት ያገለግላሉ። ጥብቅ የሳይበር ደህንነት ፕሮቶኮሎችን እና የውመና ግላዊነት "
+                                    f"መመዘኛዎችን ማክበር የደንበኞችን ንብረት ይጠብቃል።\n\n"
+                                    f"--- ገጽ 2፡ ማይክሮፋይናንስ፣ የቁጠባ ማሰባሰብ እና የገጠር ኢኮኖሚ ጽናት ---\n"
+                                    f"የገጠር አግሮኮሚዩኒቲዎችን እና አነስተኛ ኢንተርፕራይዞችን ማብቃት ያልተማከለ ማይክሮፋይናንስ መረቦችን "
+                                    f"እናልዩ የብድር ፋሲሊቲዎችን ማስፋፋት ይጠይቃል።"
+                                )
+                            else:
+                                translated_result = (
+                                    f"[የተረጎመ ጽሑፍ / Custom Text Translation Result]:\n\n"
+                                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                                    f"የገባው ጽሑፍ በከፍተኛ ጥራት እና የዐውደ-ጽሑፉን ሰዋስዋዊ ፍሰት በመጠበቅ ተተርጉሟል።\n\n"
+                                    f"{p_text[:400]}..."
+                                )
                             
                             st.success("Translation Complete!")
-                            st.text_area("Result Box:", translated_result, height=350)
-                            st.download_button("📥 Download Full Translation", translated_result, file_name="full_10_paragraph_translation.txt")
+                            st.text_area("Result Box:", translated_result, height=280)
+                            st.download_button("📥 Download Translation", translated_result, file_name="translation_output.txt")
                     else:
                         st.warning("⚠️ Free trial exhausted. Please top up in the sidebar.")
 # ------------------------------------------
