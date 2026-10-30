@@ -128,17 +128,25 @@ tabs = st.tabs([
 ])
 
 # ------------------------------------------
-# TAB 1: AUDIO TRANSCRIPTION
+# TAB 1: VIDEO & AUDIO TRANSCRIPTION
 # ------------------------------------------
 with tabs[0]:
-    st.header("Audio Transcription & Speaker Diarization")
-    st.write("First **10 minutes are 100% free**. Billed at **0.50 ETB / min** (Local) or **0.50 USD / min** (International).")
+    header_col1, header_col2 = st.columns([4, 1])
+    with header_col1:
+        st.header("Video & Audio Transcription & Diarization")
+        st.write("Upload video or audio recordings (MP4, MKV, MP3, WAV, M4A). First **10 minutes are 100% free**.")
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        uploaded_audio = st.file_uploader("Upload Audio Recording (MP3, WAV, M4A)", type=["mp3", "wav", "m4a"])
-        audio_lang = st.selectbox("Audio Language", ["Auto-Detect (AI Powered)", "Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)"])
+        uploaded_media = st.file_uploader(
+            "Upload Video or Audio File", 
+            type=["mp4", "mov", "avi", "mkv", "mp3", "wav", "m4a", "aac"]
+        )
+        audio_lang = st.selectbox(
+            "Language", 
+            ["Auto-Detect (AI Powered)", "Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)"]
+        )
         diarization = st.checkbox("Enable Speaker Diarization (Who Spoke When)", value=True)
         
         run_transcription = st.button("Start Intelligent Transcription", type="primary", use_container_width=True)
@@ -146,17 +154,17 @@ with tabs[0]:
     with col2:
         st.subheader("Live Output & Diarization")
         if run_transcription:
-            if uploaded_audio is None:
-                st.error("Please upload an audio file first!")
+            if uploaded_media is None:
+                st.error("Please upload a video or audio file first!")
             else:
-                with st.spinner("Processing speech recognition with AI..."):
+                with st.spinner("Extracting media track and processing AI speech recognition..."):
                     time.sleep(1.5)
                     st.session_state.free_minutes_used += 3.5  
                     st.success("Transcription Generated Successfully!")
                     
                     sample_output = """
-[00:00:10 - SPEAKER 01]: እንኳን ደህና መጡ። የአገር ውስጥ እና የውጭ ሀገር ክፍያ ስርዓት ሙሉ በሙሉ ተስተካክሏል።
-[00:00:25 - SPEAKER 02]: Welcome! Multi-currency processing for USD, EUR, and GBP is fully operational.
+[00:00:10 - SPEAKER 01]: እንኳን ደህና መጡ። የቪዲዮ እና የድምፅ ፋይሎች በትክክል እየተተረጎሙ ናቸው።
+[00:00:25 - SPEAKER 02]: Welcome! Both video and audio files are being processed and diarized successfully.
                     """
                     st.text_area("Segmented Transcript Result:", sample_output, height=200)
                     st.download_button("📥 Download Transcript", sample_output, file_name="scriber_transcript.txt")
