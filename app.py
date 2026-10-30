@@ -3,7 +3,7 @@ import tempfile
 import os
 import time
 from pypdf import PdfReader
-from deep_translator import GoogleTranslator
+from google import genai
 
 # ==========================================
 # PAGE CONFIGURATION & BURGUNDY THEME
@@ -75,6 +75,10 @@ with st.sidebar:
     st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.9em;'>Universal AI Translation & Transcription Suite</p>", unsafe_allow_html=True)
     st.markdown("---")
     
+    st.markdown("### 🔑 API Configuration")
+    gemini_key_input = st.text_input("Gemini API Key:", type="password", placeholder="Enter your Gemini API key...", value=os.environ.get("GEMINI_API_KEY", ""))
+    
+    st.markdown("---")
     st.markdown("### 📊 Account Status")
     if st.session_state.is_admin:
         st.success("👑 **Admin VIP Pass Active**\n\nUnlimited Access Granted")
@@ -139,7 +143,7 @@ with st.sidebar:
 # MAIN INTERFACE
 # ==========================================
 st.markdown("<h1 style='text-align: left;'>Universal Context-Aware AI & Translation Suite</h1>", unsafe_allow_html=True)
-st.markdown("<p style='font-size: 1.1em; color: #495057;'>High-precision automated transcription, diarization, and contextual translation across all world and regional languages.</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 1.1em; color: #495057;'>High-precision automated transcription, diarization, and contextual translation powered by Google Gemini API.</p>", unsafe_allow_html=True)
 
 tabs = st.tabs([
     "🎙️ Universal Video & Audio Transcription", 
@@ -204,13 +208,20 @@ with tabs[1]:
             st.warning("Please enter text to summarize.")
         else:
             with st.spinner("Synthesizing multi-language insights..."):
-                time.sleep(1)
-                st.markdown("### 📋 Executive Summary Report")
-                st.success("""
-                * **Universal Coverage:** Fully adaptive across all language pairs with contextual grammar preservation.
-                * **Free Trial:** 10 minutes audio/video and 2 pages/blocks of text free for all users.
-                * **Enterprise Security:** High-accuracy semantic mapping for professional legal, financial, and technical content.
-                """)
+                if not gemini_key_input:
+                    st.error("Please enter your Gemini API Key in the sidebar.")
+                else:
+                    try:
+                        client = genai.Client(api_key=gemini_key_input)
+                        prompt = f"Provide a concise executive summary of the following meeting notes/transcript:\n\n{raw_text}"
+                        response = client.models.generate_content(
+                            model='gemini-2.5-flash',
+                            contents=prompt
+                        )
+                        st.markdown("### 📋 Executive Summary Report")
+                        st.success(response.text)
+                    except Exception as e:
+                        st.error(f"API Error: {str(e)}")
 
 # ------------------------------------------
 # TAB 3: UNIVERSAL PDF & TEXT TRANSLATION
@@ -220,21 +231,6 @@ with tabs[2]:
     st.write("Upload PDF documents or paste text directly. First **2 pages/blocks are 100% free**.")
     
     trans_mode = st.radio("Choose Translation Method:", ["Upload PDF Document", "Direct Copy & Paste Text"], horizontal=True)
-    
-    # Language mapping for real translation
-    lang_code_map = {
-        "English": "en",
-        "Amharic": "am",
-        "Amharic (አማርኛ)": "am",
-        "Afaan Oromo": "om",
-        "Tigrinya": "ti",
-        "Tigrinya (ትግርኛ)": "ti",
-        "Arabic": "ar",
-        "French": "fr",
-        "German": "de",
-        "Spanish": "es",
-        "Chinese": "zh-CN"
-    }
 
     if trans_mode == "Upload PDF Document":
         p_col1, p_col2 = st.columns([1, 1])
@@ -248,6 +244,8 @@ with tabs[2]:
             if pdf_btn:
                 if uploaded_pdf is None:
                     st.error("Please upload a PDF file!")
+                elif not gemini_key_input:
+                    st.error("Please enter your Gemini API Key in the sidebar.")
                 else:
                     reader = PdfReader(uploaded_pdf)
                     pages = len(reader.pages)
@@ -256,11 +254,15 @@ with tabs[2]:
                         extracted_text += page.extract_text() or ""
                     
                     if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
-                        with st.spinner(f"Translating {pages} page(s) to {tgt_lang_pdf} using real translation engine..."):
-                            target_code = lang_code_map.get(tgt_lang_pdf, "am")
+                        with st.spinner(f"Translating {pages} page(s) to {tgt_lang_pdf} using Google Gemini API..."):
                             try:
-                                time.sleep(0.5)
-                                translated_pdf_text = GoogleTranslator(source='auto', target=target_code).translate(extracted_text[:4000])
+                                client = genai.Client(api_key=gemini_key_input)
+                                prompt = f"Translate the following text accurately into {tgt_lang_pdf}, preserving professional tone, grammar, and formatting:\n\n{extracted_text[:6000]}"
+                                response = client.models.generate_content(
+                                    model='gemini-2.5-flash',
+                                    contents=prompt
+                                )
+                                translated_pdf_text = response.text
                             except Exception as e:
                                 translated_pdf_text = f"Translation Error: {str(e)}"
 
@@ -284,21 +286,27 @@ with tabs[2]:
             if text_btn:
                 if not p_text:
                     st.error("Please paste text to translate!")
+                elif not gemini_key_input:
+                    st.error("Please enter your Gemini API Key in the sidebar.")
                 else:
                     if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
-                        with st.spinner(f"Translating your text to {t_tgt} in real time..."):
+                        with st.spinner(f"Translating your text to {t_tgt} via Google Gemini API..."):
                             if not st.session_state.is_admin:
                                 st.session_state.free_pages_used += 1
                             
-                            target_code = lang_code_map.get(t_tgt.split()[0], "am")
                             try:
-                                time.sleep(0.8)
-                                real_translated_text = GoogleTranslator(source='auto', target=target_code).translate(p_text)
+                                client = genai.Client(api_key=gemini_key_input)
+                                prompt = f"Translate the following text from {t_src} to {t_tgt} with high contextual accuracy, maintaining professional grammar and tone:\n\n{p_text}"
+                                response = client.models.generate_content(
+                                    model='gemini-2.5-flash',
+                                    contents=prompt
+                                )
+                                real_translated_text = response.text
                             except Exception as e:
-                                real_translated_text = f"Translation error: {str(e)}. Please wait a few seconds and try again."
+                                real_translated_text = f"Translation error: {str(e)}"
                             
                             translated_result = (
-                                f"[LIVE AUTOMATIC TRANSLATION RESULT]\n"
+                                f"[GEMINI API TRANSLATION RESULT]\n"
                                 f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                                 f"🌐 **Target Language:** {t_tgt}\n\n"
                                 f"{real_translated_text}"
@@ -342,4 +350,4 @@ with tabs[3]:
 # FOOTER
 # ==========================================
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | Live Multilingual Translation & Transcription Active</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | Gemini API Powered Translation Active</p>", unsafe_allow_html=True)
