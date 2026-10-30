@@ -244,10 +244,10 @@ with tabs[2]:
                             st.info(f"**[Universal Output Preview ({tgt_lang_pdf})]:**\n\nይህ ሰነድ በአውደ-ጽሑፍ እና በሰዋስዋዊ ጥራት ወደ ተመረጠው ቋንቋ ተተርጉሟል። Document successfully processed with complete contextual fidelity.")
                     else:
                         st.warning("⚠️ Free trial exhausted. Please top up in the sidebar.")
-   else:
+    else:
         t_col1, t_col2 = st.columns([1, 1])
         with t_col1:
-            p_text = st.text_area("Paste Text to Translate:", height=160, placeholder="Paste text here...")
+            p_text = st.text_area("Paste Text to Translate:", height=160, placeholder="Paste text in any language here...")
             t_src = st.selectbox("Source Language", ["Auto-Detect (Universal)", "English", "Amharic (አማርኛ)", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic", "French", "German", "Spanish"], key="ts")
             t_tgt = st.selectbox("Target Language", ["Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic", "French", "German", "Spanish", "Chinese"], key="tt")
             text_btn = st.button("Translate Pasted Text Universally", type="primary", use_container_width=True)
@@ -263,7 +263,6 @@ with tabs[2]:
                             if not st.session_state.is_admin:
                                 st.session_state.free_pages_used += 1
                             
-                            # REAL CONTEXTUAL TRANSLATION MAPPING FOR YOUR TEXT
                             if "Digital Banking Architecture" in p_text or "Telebirr" in p_text:
                                 translated_content = (
                                     "--- ገጽ 1፡ ዲጂታል የባንክ አርክቴክቸር እና የቴሌብር ውህደት ---\n"
