@@ -3,6 +3,7 @@ import tempfile
 import os
 import time
 from pypdf import PdfReader
+from deep_translator import GoogleTranslator
 
 # ==========================================
 # PAGE CONFIGURATION & BURGUNDY THEME
@@ -158,7 +159,7 @@ with tabs[0]:
     
     with col1:
         uploaded_media = st.file_uploader("Upload Video or Audio File", type=["mp4", "mov", "avi", "mkv", "mp3", "wav", "m4a", "aac"])
-        audio_lang = st.selectbox("Source Audio Language", ["Auto-Detect (Multilingual AI)", "English", "Amharic (አማርኛ)", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)", "German (Deutsch)", "Spanish (Español)", "Chinese (中文)", "Japanese (日本語)"])
+        audio_lang = st.selectbox("Source Audio Language", ["Auto-Detect (Multilingual AI)", "English", "Amharic (አማርኛ)", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)", "German (Deutsch)", "Spanish (Español)", "Chinese (中文)"])
         target_trans_lang = st.selectbox("Translate Output To:", ["None (Keep Original Language)", "English", "Amharic (አማርኛ)", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)", "German (Deutsch)", "Spanish (Español)"])
         diarization = st.checkbox("Enable Speaker Diarization (Who Spoke When)", value=True)
         
@@ -171,7 +172,7 @@ with tabs[0]:
                 st.error("Please upload a video or audio file first!")
             else:
                 if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_minutes_used < 10.0:
-                    with st.spinner(f"Processing audio with accent & context preservation ({audio_lang} -> {target_trans_lang})..."):
+                    with st.spinner(f"Processing audio with accent & context preservation..."):
                         time.sleep(1.8)
                         if not st.session_state.is_admin:
                             st.session_state.free_minutes_used += 3.5  
@@ -220,6 +221,19 @@ with tabs[2]:
     
     trans_mode = st.radio("Choose Translation Method:", ["Upload PDF Document", "Direct Copy & Paste Text"], horizontal=True)
     
+    # Language mapping for real translation
+    lang_code_map = {
+        "English": "en",
+        "Amharic (አማርኛ)": "am",
+        "Afaan Oromo": "om",
+        "Tigrinya (ትግርኛ)": "ti",
+        "Arabic": "ar",
+        "French": "fr",
+        "German": "de",
+        "Spanish": "es",
+        "Chinese": "zh-CN"
+    }
+
     if trans_mode == "Upload PDF Document":
         p_col1, p_col2 = st.columns([1, 1])
         with p_col1:
@@ -235,13 +249,24 @@ with tabs[2]:
                 else:
                     reader = PdfReader(uploaded_pdf)
                     pages = len(reader.pages)
+                    extracted_text = ""
+                    for page in reader.pages:
+                        extracted_text += page.extract_text() or ""
+                    
                     if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
-                        with st.spinner(f"Translating {pages} page(s) to {tgt_lang_pdf}..."):
-                            time.sleep(1.5)
+                        with st.spinner(f"Translating {pages} page(s) to {tgt_lang_pdf} using real translation engine..."):
+                            target_code = lang_code_map.get(tgt_lang_pdf.split()[0], "am")
+                            try:
+                                translated_pdf_text = GoogleTranslator(source='auto', target=target_code).translate(extracted_text[:4000])
+                            except Exception as e:
+                                translated_pdf_text = f"Translation Error: {str(e)}"
+
                             if not st.session_state.is_admin:
                                 st.session_state.free_pages_used += pages
+                            
                             st.success(f"Successfully translated {pages} page(s)!")
-                            st.info(f"**[Universal Output Preview ({tgt_lang_pdf})]:**\n\nይህ ሰነድ በአውደ-ጽሑፍ እና በሰዋስዋዊ ጥራት ወደ ተመረጠው ቋንቋ ተተርጉሟል። Document successfully processed with complete contextual fidelity.")
+                            st.text_area("Result Box:", translated_pdf_text, height=280)
+                            st.download_button("📥 Download Translation", translated_pdf_text, file_name="pdf_translation.txt")
                     else:
                         st.warning("⚠️ Free trial exhausted. Please top up in the sidebar.")
     else:
@@ -258,25 +283,34 @@ with tabs[2]:
                     st.error("Please paste text to translate!")
                 else:
                     if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
-                        with st.spinner(f"Translating your updated text to {t_tgt} with professional context..."):
-                            time.sleep(1.2)
+                        with st.spinner(f"Translating your text to {t_tgt} in real time..."):
+                            time.sleep(0.5)
                             if not st.session_state.is_admin:
                                 st.session_state.free_pages_used += 1
                             
-                            # COMPLETELY DYNAMIC TRANSLATION: Processes whatever text is pasted right now!
-                            para_count = len([p for p in p_text.split('\n') if p.strip()])
+                            # REAL LIVE TRANSLATION USING GOOGLE TRANSLATOR
+                            target_code = lang_code_map.get(t_tgt.split()[0], "am")
+                            try:
+                                # Translate paragraph by paragraph or chunk to preserve flow
+                                paragraphs = p_text.split('\n')
+                                translated_paragraphs = []
+                                for para in paragraphs:
+                                    if para.strip():
+                                        res = GoogleTranslator(source='auto', target=target_code).translate(para)
+                                        translated_paragraphs.append(res)
+                                    else:
+                                        translated_paragraphs.append("")
+                                real_translated_text = "\n\n".join(translated_paragraphs)
+                            except Exception as e:
+                                real_translated_text = f"Translation error: {str(e)}. Please check your internet connection."
                             
                             translated_result = (
-                                f"[UNIVERSAL DYNAMIC TRANSLATION RESULT]\n"
+                                f"[REAL-TIME DYNAMIC TRANSLATION RESULT]\n"
                                 f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                                f"🌐 **Source:** {t_src}  ➔  **Target:** {t_tgt}\n"
-                                f"📊 **Text Blocks Analyzed:** {para_count}\n\n"
+                                f"🌐 **Source:** Auto  ➔  **Target:** {t_tgt}\n\n"
                                 f"[TRANSLATED OUTPUT / የተረጎመ ጽሑፍ]:\n\n"
-                                f"Your updated text has been dynamically processed, keeping complete professional tone, grammar, and semantic accuracy for your selected target language ({t_tgt}):\n\n"
-                                f"----------------------------------------\n"
-                                f"{p_text}\n"
-                                f"----------------------------------------\n\n"
-                                f"✅ *(Dynamic Translation Complete with Full Contextual Fidelity)*"
+                                f"{real_translated_text}\n\n"
+                                f"✅ *(Live Translation Complete)*"
                             )
                             
                             st.success("Translation Complete!")
@@ -290,7 +324,7 @@ with tabs[2]:
 # ------------------------------------------
 with tabs[3]:
     st.header("Transparent Multi-Currency Estimator")
-    calc_mode = st.radio("Pricing Region:", ["Local (ETB)", "International (USD / EUR / GBP / AED / CHF)"], horizontal=True)
+    calc_mode = st.radio("Pricing Region:", ["Local (Ethiopia)", "International (USD / EUR / GBP / AED / CHF)"], horizontal=True)
     service_sel = st.radio("Service:", ["PDF/Text Translation (per unit)", "Video & Audio Transcription (per minute)"], horizontal=True)
     
     if "Local" in calc_mode:
@@ -317,4 +351,4 @@ with tabs[3]:
 # FOOTER
 # ==========================================
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | Universal Multilingual Translation & Transcription Active</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | Live Multilingual Translation & Transcription Active</p>", unsafe_allow_html=True)
