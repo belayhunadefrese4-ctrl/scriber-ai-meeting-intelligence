@@ -8,7 +8,7 @@ from pypdf import PdfReader
 # PAGE CONFIGURATION & BURGUNDY THEME
 # ==========================================
 st.set_page_config(
-    page_title="Scriber AI - Global Speech & Document Intelligence",
+    page_title="Scriber AI - Universal Speech & Document Intelligence",
     page_icon="🎙️",
     layout="wide"
 )
@@ -90,14 +90,24 @@ with st.sidebar:
         st.info("📌 **Receiving Accounts:**\n* **CBE:** `1000296269488`\n* **Telebirr:** `+251 986884912`")
         local_method = st.selectbox("Payment Channel:", ["Telebirr", "Commercial Bank of Ethiopia (CBE)", "Awash / Dashen Bank"])
         topup = st.slider("Top-Up Amount (ETB):", 20, 1000, 100, step=20)
-        ref_id = st.text_input("Your Phone / Account & Transaction ID:", placeholder="e.g. 0912345678 / FT12345")
+        
+        # CLEAR INSTRUCTIONAL INPUT BOX
+        ref_id = st.text_input(
+            "Your Phone / Account & Transaction ID:", 
+            placeholder="e.g. 0912345678 / FT12345 (from your CBE/Telebirr SMS)"
+        )
         curr_selected = "ETB"
     else:
         st.info("🌍 **International Deposit Details:**\n* Send via **WorldRemit, Wave, Remitly** to Telebirr (`+251986884912`) or CBE (`1000296269488`).")
         remit_app = st.selectbox("Remittance App / Method:", ["WorldRemit", "Remitly", "Wave", "TapTap Send", "Direct International Card"])
         curr_selected = st.selectbox("Currency:", ["USD ($)", "EUR (€)", "GBP (£)", "AED (د.إ)", "CHF (Fr)"]).split()[0]
         topup = st.slider(f"Top-Up Amount ({curr_selected}):", 5, 200, 25, step=5)
-        ref_id = st.text_input("Sender Name & Reference Code:", placeholder="e.g. John Doe / WR-984210")
+        
+        # CLEAR INSTRUCTIONAL INPUT BOX
+        ref_id = st.text_input(
+            "Sender Name & Reference Code:", 
+            placeholder="e.g. John Doe / WR-984210 (from Remit App)"
+        )
 
     if st.button("Confirm Payment & Top-Up", use_container_width=True):
         if not ref_id:
@@ -118,10 +128,10 @@ with st.sidebar:
 # MAIN INTERFACE
 # ==========================================
 st.markdown("<h1 style='text-align: left;'>Multilingual AI Transcription & Document Intelligence</h1>", unsafe_allow_html=True)
-st.markdown("<p style='font-size: 1.1em; color: #495057;'>High-performance speech-to-text and document translation optimized for local and global users.</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 1.1em; color: #495057;'>High-performance video, audio speech-to-text, and document translation optimized for local and global users.</p>", unsafe_allow_html=True)
 
 tabs = st.tabs([
-    "🎙️ Audio Transcription & Diarization", 
+    "🎙️ Video & Audio Transcription", 
     "📊 Meeting Intelligence", 
     "📄 PDF Document Translation",
     "⚙️ Multi-Currency Pricing Calculator"
@@ -131,22 +141,14 @@ tabs = st.tabs([
 # TAB 1: VIDEO & AUDIO TRANSCRIPTION
 # ------------------------------------------
 with tabs[0]:
-    header_col1, header_col2 = st.columns([4, 1])
-    with header_col1:
-        st.header("Video & Audio Transcription & Diarization")
-        st.write("Upload video or audio recordings (MP4, MKV, MP3, WAV, M4A). First **10 minutes are 100% free**.")
+    st.header("Video & Audio Transcription & Diarization")
+    st.write("Upload video or audio files (MP4, MKV, MP3, WAV, M4A). First **10 minutes are 100% free**. Billed at **0.50 ETB / min** (Local) or **0.50 USD / min** (International).")
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        uploaded_media = st.file_uploader(
-            "Upload Video or Audio File", 
-            type=["mp4", "mov", "avi", "mkv", "mp3", "wav", "m4a", "aac"]
-        )
-        audio_lang = st.selectbox(
-            "Language", 
-            ["Auto-Detect (AI Powered)", "Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)"]
-        )
+        uploaded_media = st.file_uploader("Upload Video or Audio File", type=["mp4", "mov", "avi", "mkv", "mp3", "wav", "m4a", "aac"])
+        audio_lang = st.selectbox("Language", ["Auto-Detect (AI Powered)", "Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)", "German (Deutsch)"])
         diarization = st.checkbox("Enable Speaker Diarization (Who Spoke When)", value=True)
         
         run_transcription = st.button("Start Intelligent Transcription", type="primary", use_container_width=True)
@@ -157,14 +159,14 @@ with tabs[0]:
             if uploaded_media is None:
                 st.error("Please upload a video or audio file first!")
             else:
-                with st.spinner("Extracting media track and processing AI speech recognition..."):
+                with st.spinner("Extracting media track and processing speech recognition with AI..."):
                     time.sleep(1.5)
                     st.session_state.free_minutes_used += 3.5  
                     st.success("Transcription Generated Successfully!")
                     
                     sample_output = """
 [00:00:10 - SPEAKER 01]: እንኳን ደህና መጡ። የቪዲዮ እና የድምፅ ፋይሎች በትክክል እየተተረጎሙ ናቸው።
-[00:00:25 - SPEAKER 02]: Welcome! Both video and audio files are being processed and diarized successfully.
+[00:00:25 - SPEAKER 02]: Welcome! Multi-currency processing and video transcription are fully operational.
                     """
                     st.text_area("Segmented Transcript Result:", sample_output, height=200)
                     st.download_button("📥 Download Transcript", sample_output, file_name="scriber_transcript.txt")
@@ -186,7 +188,7 @@ with tabs[1]:
                 st.success("""
                 * **Global Expansion:** Successfully integrated high-value currency pricing (USD, EUR, GBP, AED, CHF).
                 * **Remittance Support:** WorldRemit, Wave, and Remitly direct deposits configured for CBE (`1000296269488`) and Telebirr (`+251986884912`).
-                * **AI Capabilities:** Auto-detection enabled for multiple international languages.
+                * **Media & Languages:** Full support for video/audio uploads and AI Auto-Detection.
                 """)
 
 # ------------------------------------------
@@ -200,8 +202,8 @@ with tabs[2]:
     
     with pdf_col1:
         uploaded_pdf = st.file_uploader("Upload PDF Document", type=["pdf"])
-        src_lang = st.selectbox("Source Language", ["Auto-Detect (AI Powered)", "English", "Amharic", "Arabic", "French"])
-        tgt_lang = st.selectbox("Target Translation Language", ["Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)"])
+        src_lang = st.selectbox("Source Language", ["Auto-Detect (AI Powered)", "English", "Amharic", "Arabic", "French", "German"])
+        tgt_lang = st.selectbox("Target Translation Language", ["Amharic (አማርኛ)", "English", "Afaan Oromo", "Tigrinya (ትግርኛ)", "Arabic (العربية)", "French (Français)", "German (Deutsch)"])
         
         translate_btn = st.button("Translate PDF Now", type="primary", use_container_width=True)
 
@@ -228,7 +230,7 @@ with tabs[3]:
     st.header("Transparent Multi-Currency Estimator")
     
     calc_mode = st.radio("Pricing Region:", ["Local (ETB)", "International (USD / EUR / GBP / AED / CHF)"], horizontal=True)
-    service_sel = st.radio("Service:", ["PDF Translation (per page)", "Audio Transcription (per minute)"], horizontal=True)
+    service_sel = st.radio("Service:", ["PDF Translation (per page)", "Video & Audio Transcription (per minute)"], horizontal=True)
     
     if "Local" in calc_mode:
         if "PDF" in service_sel:
@@ -250,4 +252,4 @@ with tabs[3]:
 # FOOTER
 # ==========================================
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | Multi-Currency CBE, Telebirr & WorldRemit Gateway</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | Universal Video, Speech & Multi-Currency Gateway</p>", unsafe_allow_html=True)
