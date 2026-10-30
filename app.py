@@ -205,9 +205,6 @@ with tabs[1]:
                 * **Global Reach:** Multi-currency support across USD, EUR, GBP, AED, and CHF.
                 """)
 
-# ------------------------------------------
-# TAB 3: PDF & TEXT TRANSLATION
-# ------------------------------------------
 else:
         t_col1, t_col2 = st.columns([1, 1])
         with t_col1:
