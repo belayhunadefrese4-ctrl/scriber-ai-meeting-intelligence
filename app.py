@@ -16,27 +16,20 @@ st.set_page_config(
 # Custom Burgundy & Modern Dark/Light Styling Injection
 st.markdown("""
 <style>
-    /* Main Theme Colors */
     :root {
         --primary-color: #800020; /* Burgundy */
         --background-color: #F8F9FA;
         --secondary-background: #FFFFFF;
         --text-color: #212529;
     }
-    
-    /* Global App Styling */
     .main {
         background-color: var(--background-color);
         color: var(--text-color);
     }
-    
-    /* Custom Headers */
     h1, h2, h3 {
         color: #800020 !important;
         font-family: 'Helvetica Neue', sans-serif;
     }
-    
-    /* Custom Buttons */
     div.stButton > button:first-child {
         background-color: #800020;
         color: white;
@@ -49,20 +42,9 @@ st.markdown("""
         background-color: #5c0017;
         color: white;
     }
-    
-    /* Sidebar Styling */
     section[data-testid="stSidebar"] {
         background-color: #F1F3F5;
         border-right: 1px solid #DEE2E6;
-    }
-    
-    /* Metrics & Cards */
-    .metric-card {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border-left: 5px solid #800020;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -71,7 +53,7 @@ st.markdown("""
 # SESSION STATE & USAGE TRACKING
 # ==========================================
 if "free_minutes_used" not in st.session_state:
-    st.session_state.free_minutes_used = 0.0  # 10 minutes free trial limit
+    st.session_state.free_minutes_used = 0.0  
 if "is_pro_active" not in st.session_state:
     st.session_state.is_pro_active = False
 if "user_balance" not in st.session_state:
@@ -106,7 +88,7 @@ with st.sidebar:
         if not customer_phone_or_acc:
             st.error("Please enter your account or phone number.")
         else:
-            with st.spinner(fConnecting to {payment_provider} API...):
+            with st.spinner(f"Connecting to {payment_provider} API..."):
                 time.sleep(1.2)
                 st.session_state.user_balance += topup_amount
                 st.session_state.is_pro_active = True
@@ -151,12 +133,12 @@ with tabs[0]:
                 if st.session_state.free_minutes_used < 10.0 or st.session_state.user_balance >= 2.0:
                     with st.spinner("Processing speech recognition and speaker separation..."):
                         time.sleep(2)
-                        st.session_state.free_minutes_used += 3.5  # Simulated file duration
+                        st.session_state.free_minutes_used += 3.5  
                         st.success("Transcription Generated Successfully!")
                         
                         sample_output = """
-[00:00:10 - SPEAKER 01 (ማስተር ሰብለሰ»: እንኳን ደህና መጡ። የዛሬውን ስብሰባ እንጀምር።
-[00:00:25 - SPEAKER 02 (አቶ ከበደ)]: شکراً፣ የቴሌብር እና የ CBE ክፍያ ሲስተም በትክክል እየሰራ ነው።
+[00:00:10 - SPEAKER 01 (አስተባባሪ)]: እንኳን ደህና መጡ። የዛሬውን ስብሰባ እንጀምር።
+[00:00:25 - SPEAKER 02 (ተሳታፊ)]: شکراً፣ የቴሌብር እና የ CBE ክፍያ ሲስተም በትክክል እየሰራ ነው።
 [00:00:42 - SPEAKER 01]: Excellent. The automated usage-based pricing model is fully active.
                         """
                         st.text_area("Segmented Transcript Result:", sample_output, height=220)
@@ -230,7 +212,7 @@ with tabs[3]:
     
     if "Audio" in calc_type:
         mins = st.slider("Select Audio Length (Minutes):", 1, 180, 15)
-        est_cost = max(0, (mins - 10)) * 0.50  # First 10 mins free
+        est_cost = max(0, (mins - 10)) * 0.50  
         st.metric("Estimated Cost", f"{est_cost:.2f} ETB", help="First 10 minutes are 100% free!")
     else:
         pages = st.slider("Select Number of PDF Pages:", 1, 200, 10)
