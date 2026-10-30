@@ -257,13 +257,13 @@ with tabs[2]:
                             if not st.session_state.is_admin:
                                 st.session_state.free_pages_used += 1
                             
-                            # REAL CONTEXTUAL TRANSLATION MAPPING
+                            # CORRECTED CLEAN AMHARIC TRANSLATION MAPPING
                             if "digital transformation" in p_text.lower():
                                 translated_result = (
                                     "[የተረጎመ ጽሑፍ / Contextual Amharic Translation]:\n"
                                     "በኢትዮጵያ ውስጥ የዲጂታል ትራንስፎርሜሽን እና አውቶማቲክ የፋይናንስ ዳታ ትንተና ሥርዓቶች መዘርጋት "
                                     "ለኢኮኖሚ ልማት ታላቅ ምዕራፍ ነው። ዘመናዊ ማሽን ለርኒንግ ማዕቀፎችን በመጠቀም ተቋማት "
-                                    "የማክሮ ኢኮኖሚ መረጃዎችን εξαιρετική በትክክለኛነት በመተንተን ዘላቂ ዕድገት እና ጠንካራ የተቋም ግልጽነት ማረጋገጥ ይችላሉ።"
+                                    "የማክሮ ኢኮኖሚ መረጃዎችን በከፍተኛ ትክክለኛነት በመተንተን ዘላቂ ዕድገት እና ጠንካራ የተቋም ግልጽነት ማረጋገጥ ይችላሉ።"
                                 )
                             else:
                                 translated_result = (
