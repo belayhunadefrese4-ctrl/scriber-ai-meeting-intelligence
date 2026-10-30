@@ -49,12 +49,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# SESSION STATE & BALANCE
+# SESSION STATE & ADMIN / FREE TIER SETUP
 # ==========================================
 if "free_minutes_used" not in st.session_state:
-    st.session_state.free_minutes_used = 0.0  
+    st.session_state.free_minutes_used = 0.0  # Limit: 10 mins free
+if "free_pages_used" not in st.session_state:
+    st.session_state.free_pages_used = 0.0    # Limit: 2 pages free
 if "is_pro_active" not in st.session_state:
     st.session_state.is_pro_active = False
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
 if "user_balance_etb" not in st.session_state:
     st.session_state.user_balance_etb = 0.0
 if "user_balance_foreign" not in st.session_state:
@@ -63,7 +67,7 @@ if "user_currency" not in st.session_state:
     st.session_state.user_currency = "ETB"
 
 # ==========================================
-# SIDEBAR: UNIVERSAL PAYMENT & REMITTANCE HUB
+# SIDEBAR: UNIVERSAL PAYMENT & ADMIN HUB
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='color: #800020; text-align: center;'>🎙️ SCRIBER AI</h2>", unsafe_allow_html=True)
@@ -71,64 +75,70 @@ with st.sidebar:
     st.markdown("---")
     
     st.markdown("### 📊 Account Status")
-    if st.session_state.is_pro_active:
+    if st.session_state.is_admin:
+        st.success("👑 **Admin VIP Pass Active**\n\nUnlimited Access Granted")
+    elif st.session_state.is_pro_active:
         st.success("🌟 **Pro Enterprise Tier Active**")
         if st.session_state.user_currency == "ETB":
             st.metric("Account Balance", f"{st.session_state.user_balance_etb:.2f} ETB")
         else:
             st.metric("Account Balance", f"{st.session_state.user_balance_foreign:.2f} {st.session_state.user_currency}")
     else:
-        free_left = max(0.0, 10.0 - st.session_state.free_minutes_used)
-        st.info(f"🎁 **Free Tier Trial**\n\nFree Minutes Remaining: **{free_left:.1f} / 10.0 mins**")
+        mins_left = max(0.0, 10.0 - st.session_state.free_minutes_used)
+        pages_left = max(0, 2 - int(st.session_state.free_pages_used))
+        st.info(f"🎁 **Free Tier Trial**\n\n* Audio/Video Free Left: **{mins_left:.1f} / 10.0 mins**\n* PDF Free Left: **{pages_left} / 2 pages**")
     
     st.markdown("---")
-    st.markdown("### 💳 Universal Payment & Remittance")
+    st.markdown("### 💳 Payment & Admin Access")
     
-    pay_type = st.radio("User Region:", ["Local (Ethiopia)", "International / Diaspora"], horizontal=True)
+    portal_mode = st.radio("Select Portal Mode:", ["Client Top-Up", "Admin / Promo Activation"], horizontal=True)
     
-    if pay_type == "Local (Ethiopia)":
-        st.info("📌 **Receiving Accounts:**\n* **CBE:** `1000296269488`\n* **Telebirr:** `+251 986884912`")
-        local_method = st.selectbox("Payment Channel:", ["Telebirr", "Commercial Bank of Ethiopia (CBE)", "Awash / Dashen Bank"])
-        topup = st.slider("Top-Up Amount (ETB):", 20, 1000, 100, step=20)
-        
-        # CLEAR INSTRUCTIONAL INPUT BOX
-        ref_id = st.text_input(
-            "Your Phone / Account & Transaction ID:", 
-            placeholder="e.g. 0912345678 / FT12345 (from your CBE/Telebirr SMS)"
-        )
-        curr_selected = "ETB"
-    else:
-        st.info("🌍 **International Deposit Details:**\n* Send via **WorldRemit, Wave, Remitly** to Telebirr (`+251986884912`) or CBE (`1000296269488`).")
-        remit_app = st.selectbox("Remittance App / Method:", ["WorldRemit", "Remitly", "Wave", "TapTap Send", "Direct International Card"])
-        curr_selected = st.selectbox("Currency:", ["USD ($)", "EUR (€)", "GBP (£)", "AED (د.إ)", "CHF (Fr)"]).split()[0]
-        topup = st.slider(f"Top-Up Amount ({curr_selected}):", 5, 200, 25, step=5)
-        
-        # CLEAR INSTRUCTIONAL INPUT BOX
-        ref_id = st.text_input(
-            "Sender Name & Reference Code:", 
-            placeholder="e.g. John Doe / WR-984210 (from Remit App)"
-        )
-
-    if st.button("Confirm Payment & Top-Up", use_container_width=True):
-        if not ref_id:
-            st.error("Please enter your account reference or transaction code.")
-        else:
-            with st.spinner("Verifying transfer and updating account balance..."):
-                time.sleep(1.2)
+    if portal_mode == "Admin / Promo Activation":
+        admin_code_input = st.text_input("Enter Admin Code or Promo:", type="password", placeholder="Enter code...")
+        if st.button("Activate Admin / Pro Code", use_container_width=True):
+            if admin_code_input in ["ETHIO-AI-2026", "ADMIN-VIP"]:
+                st.session_state.is_admin = True
                 st.session_state.is_pro_active = True
-                st.session_state.user_currency = curr_selected
-                if curr_selected == "ETB":
-                    st.session_state.user_balance_etb += topup
-                else:
-                    st.session_state.user_balance_foreign += topup
-                st.success(f"Successfully credited {topup} {curr_selected}!")
+                st.success("Admin VIP Access Unlocked Successfully!")
                 st.rerun()
+            else:
+                st.error("Invalid Admin Code.")
+    else:
+        pay_type = st.radio("User Region:", ["Local (Ethiopia)", "International / Diaspora"], horizontal=True)
+        
+        if pay_type == "Local (Ethiopia)":
+            st.info("📌 **Receiving Accounts:**\n* **CBE:** `1000296269488`\n* **Telebirr:** `+251 986884912`")
+            local_method = st.selectbox("Payment Channel:", ["Telebirr", "CBE", "Awash / Dashen Bank"])
+            topup = st.slider("Top-Up Amount (ETB):", 20, 1000, 100, step=20)
+            ref_id = st.text_input("Your Phone / Account & Transaction ID:", placeholder="e.g. 0912345678 / FT12345")
+            curr_selected = "ETB"
+        else:
+            st.info("🌍 **International Deposit Details:**\n* Send via **WorldRemit, Wave, Remitly** to Telebirr (`+251986884912`) or CBE (`1000296269488`).")
+            remit_app = st.selectbox("Remittance App:", ["WorldRemit", "Remitly", "Wave", "TapTap Send", "Direct Card"])
+            curr_selected = st.selectbox("Currency:", ["USD ($)", "EUR (€)", "GBP (£)", "AED (د.إ)", "CHF (Fr)"]).split()[0]
+            topup = st.slider(f"Top-Up Amount ({curr_selected}):", 5, 200, 25, step=5)
+            ref_id = st.text_input("Sender Name & Reference Code:", placeholder="e.g. John Doe / WR-984210")
+
+        if st.button("Confirm Payment & Top-Up", use_container_width=True):
+            if not ref_id:
+                st.error("Please enter your transaction reference code.")
+            else:
+                with st.spinner("Verifying transfer..."):
+                    time.sleep(1.2)
+                    st.session_state.is_pro_active = True
+                    st.session_state.user_currency = curr_selected
+                    if curr_selected == "ETB":
+                        st.session_state.user_balance_etb += topup
+                    else:
+                        st.session_state.user_balance_foreign += topup
+                    st.success(f"Successfully credited {topup} {curr_selected}!")
+                    st.rerun()
 
 # ==========================================
 # MAIN INTERFACE
 # ==========================================
 st.markdown("<h1 style='text-align: left;'>Multilingual AI Transcription & Document Intelligence</h1>", unsafe_allow_html=True)
-st.markdown("<p style='font-size: 1.1em; color: #495057;'>High-performance video, audio speech-to-text, and document translation optimized for local and global users.</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 1.1em; color: #495057;'>Enjoy 10 free minutes of video/audio and 2 free pages of PDF translation!</p>", unsafe_allow_html=True)
 
 tabs = st.tabs([
     "🎙️ Video & Audio Transcription", 
@@ -142,7 +152,7 @@ tabs = st.tabs([
 # ------------------------------------------
 with tabs[0]:
     st.header("Video & Audio Transcription & Diarization")
-    st.write("Upload video or audio files (MP4, MKV, MP3, WAV, M4A). First **10 minutes are 100% free**. Billed at **0.50 ETB / min** (Local) or **0.50 USD / min** (International).")
+    st.write("First **10 minutes are 100% free**. Billed at **0.50 ETB / min** (Local) or **0.50 USD / min** (International) thereafter.")
     
     col1, col2 = st.columns([1, 1])
     
@@ -159,17 +169,22 @@ with tabs[0]:
             if uploaded_media is None:
                 st.error("Please upload a video or audio file first!")
             else:
-                with st.spinner("Extracting media track and processing speech recognition with AI..."):
-                    time.sleep(1.5)
-                    st.session_state.free_minutes_used += 3.5  
-                    st.success("Transcription Generated Successfully!")
-                    
-                    sample_output = """
-[00:00:10 - SPEAKER 01]: እንኳን ደህና መጡ። የቪዲዮ እና የድምፅ ፋይሎች በትክክል እየተተረጎሙ ናቸው።
-[00:00:25 - SPEAKER 02]: Welcome! Multi-currency processing and video transcription are fully operational.
-                    """
-                    st.text_area("Segmented Transcript Result:", sample_output, height=200)
-                    st.download_button("📥 Download Transcript", sample_output, file_name="scriber_transcript.txt")
+                # Check if Admin, Pro, or Free minutes available
+                if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_minutes_used < 10.0:
+                    with st.spinner("Processing speech recognition with AI..."):
+                        time.sleep(1.5)
+                        if not st.session_state.is_admin:
+                            st.session_state.free_minutes_used += 3.5  
+                        st.success("Transcription Generated Successfully!")
+                        
+                        sample_output = """
+[00:00:10 - SPEAKER 01]: እንኳን ደህና መጡ። የ10 ደቂቃ ነፃ ጊዜ እና የ2 ገጽ ነፃ የፒዲኤፍ ትርጉም በሥራ ላይ ውሏል።
+[00:00:25 - SPEAKER 02]: Welcome! The 10-minute free audio trial and 2-page free PDF translation are fully active.
+                        """
+                        st.text_area("Segmented Transcript Result:", sample_output, height=200)
+                        st.download_button("📥 Download Transcript", sample_output, file_name="scriber_transcript.txt")
+                else:
+                    st.warning("⚠️ Free 10-minute trial exhausted. Please top up your balance in the sidebar to continue.")
 
 # ------------------------------------------
 # TAB 2: MEETING INTELLIGENCE
@@ -186,9 +201,9 @@ with tabs[1]:
                 time.sleep(1)
                 st.markdown("### 📋 Executive Summary Report")
                 st.success("""
-                * **Global Expansion:** Successfully integrated high-value currency pricing (USD, EUR, GBP, AED, CHF).
-                * **Remittance Support:** WorldRemit, Wave, and Remitly direct deposits configured for CBE (`1000296269488`) and Telebirr (`+251986884912`).
-                * **Media & Languages:** Full support for video/audio uploads and AI Auto-Detection.
+                * **Free Trial Policy:** First 10 minutes of audio/video and first 2 pages of PDF translation are completely free for all clients.
+                * **Admin Privileges:** Admin account has permanent unlimited VIP access.
+                * **Global Payments:** Fully connected with CBE, Telebirr, and international remittance apps.
                 """)
 
 # ------------------------------------------
@@ -196,7 +211,7 @@ with tabs[1]:
 # ------------------------------------------
 with tabs[2]:
     st.header("PDF Document Translation & Extraction")
-    st.write("Rates: **2.00 ETB per page** (Local) | **0.50 USD / EUR / GBP / AED / CHF per page** (International).")
+    st.write("First **2 pages are 100% free**. Subsequent pages: **2.00 ETB / page** (Local) | **0.50 USD / page** (International).")
     
     pdf_col1, pdf_col2 = st.columns([1, 1])
     
@@ -215,13 +230,17 @@ with tabs[2]:
             else:
                 reader = PdfReader(uploaded_pdf)
                 page_count = len(reader.pages)
-                cost_etb = page_count * 2.00
-                cost_foreign = page_count * 0.50
                 
-                with st.spinner(f"Translating {page_count} pages..."):
-                    time.sleep(1.5)
-                    st.success(f"Translated {page_count} page(s)! (Local: {cost_etb:.2f} ETB | Foreign: ${cost_foreign:.2f})")
-                    st.info("**[Sample Translated Preview]:**\n\nይህ ሰነድ በአለም አቀፍ እና በአገር ውስጥ የክፍያ አማራጮች በትክክል ተተርጉሟል።")
+                # Check free pages rule
+                if st.session_state.is_admin or st.session_state.is_pro_active or st.session_state.free_pages_used < 2:
+                    with st.spinner(f"Translating {page_count} pages..."):
+                        time.sleep(1.5)
+                        if not st.session_state.is_admin:
+                            st.session_state.free_pages_used += page_count
+                        st.success(f"Successfully translated {page_count} page(s)!")
+                        st.info("**[Sample Translated Preview]:**\n\nይህ ሰነድ የመጀመሪያዎቹ 2 ገጾች ነፃ በሆነ መልኩ ተተርጉሟል።")
+                else:
+                    st.warning("⚠️ Free 2-page PDF translation trial exhausted. Please top up your balance in the sidebar to continue.")
 
 # ------------------------------------------
 # TAB 4: PRICING CALCULATOR
@@ -235,21 +254,25 @@ with tabs[3]:
     if "Local" in calc_mode:
         if "PDF" in service_sel:
             p = st.slider("Pages:", 1, 200, 10)
-            st.metric("Estimated Cost", f"{p * 2.00:.2f} ETB", help="Rate: 2.00 ETB per page")
+            cost = max(0, (p - 2)) * 2.00  # First 2 pages free
+            st.metric("Estimated Cost", f"{cost:.2f} ETB", help="First 2 pages are 100% free! Subsequent pages 2.00 ETB/page")
         else:
             m = st.slider("Minutes:", 1, 180, 15)
-            st.metric("Estimated Cost", f"{max(0, m - 10) * 0.50:.2f} ETB", help="Rate: 0.50 ETB/min (First 10 mins free)")
+            cost = max(0, (m - 10)) * 0.50  # First 10 mins free
+            st.metric("Estimated Cost", f"{cost:.2f} ETB", help="First 10 minutes are 100% free! Subsequent minutes 0.50 ETB/min")
     else:
         fc = st.selectbox("Currency:", ["USD ($)", "EUR (€)", "GBP (£)", "AED (د.إ)", "CHF (Fr)"])[:3]
         if "PDF" in service_sel:
             p = st.slider("Pages:", 1, 200, 10)
-            st.metric("Estimated Cost", f"{p * 0.50:.2f} {fc}", help="Rate: 0.50 per page")
+            cost = max(0, (p - 2)) * 0.50
+            st.metric("Estimated Cost", f"{cost:.2f} {fc}", help="First 2 pages free! Then 0.50 per page")
         else:
             m = st.slider("Minutes:", 1, 180, 15)
-            st.metric("Estimated Cost", f"{m * 0.50:.2f} {fc}", help="Rate: 0.50 per minute")
+            cost = max(0, (m - 10)) * 0.50
+            st.metric("Estimated Cost", f"{cost:.2f} {fc}", help="First 10 mins free! Then 0.50 per minute")
 
 # ==========================================
 # FOOTER
 # ==========================================
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | Universal Video, Speech & Multi-Currency Gateway</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #6c757d; font-size: 0.85em;'>© 2026 Scriber AI Platform | 10 Mins Audio & 2 Pages PDF Free Trial Active</p>", unsafe_allow_html=True)
